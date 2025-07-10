@@ -1,9 +1,51 @@
 <template>
   <TitleNav />
-  <!-- <MyTest /> -->
+  <main>
+    <CalendarArea v-if="calendarVisible" />
+    <!-- <MyTest /> -->
+    <DetailedItineraryArea />
+  </main>
 </template>
 
-<script setup></script>
+<script setup>
+import {ref, provide} from "vue";
+
+// 共享的日期狀態
+const selectedDate = ref(new Date());
+const today = new Date();
+
+// 控制 CalendarArea 顯示/隱藏的狀態
+const calendarVisible = ref(true);
+
+// 提供給子組件的日期操作函數
+const selectDate = date => {
+  selectedDate.value = new Date(date);
+};
+
+const changeDay = delta => {
+  const newDate = new Date(selectedDate.value);
+  newDate.setDate(newDate.getDate() + delta);
+  selectedDate.value = newDate;
+};
+
+const selectToday = () => {
+  selectedDate.value = new Date(today);
+};
+
+// 切換 CalendarArea 顯示/隱藏的函數
+const toggleCalendar = () => {
+  calendarVisible.value = !calendarVisible.value;
+};
+
+// 提供給子組件使用的狀態和函數
+provide("selectedDate", selectedDate);
+provide("today", today);
+provide("selectDate", selectDate);
+provide("changeDay", changeDay);
+provide("selectToday", selectToday);
+provide("calendarVisible", calendarVisible);
+provide("toggleCalendar", toggleCalendar);
+</script>
 
 <style>
 * {

@@ -1,0 +1,22 @@
+[
+  {"actionName": "讀書", "actionIcon": 0, "actionColor": "red"},
+  {"actionName": "運動", "actionIcon": 1, "actionColor": "blue"},
+  {"actionName": "建設", "actionIcon": 2, "actionColor": "green"},
+  {"actionName": "工程", "actionIcon": 3, "actionColor": "purple"},
+  {"actionName": "義工", "actionIcon": 4, "actionColor": "orange"},
+  {"actionName": "購物", "actionIcon": 5, "actionColor": "pink"},
+  {"actionName": "看房子", "actionIcon": 6, "actionColor": "brown"},
+  {"actionName": "做蛋糕", "actionIcon": 7, "actionColor": "teal"},
+  {"actionName": "自我提升", "actionIcon": 8, "actionColor": "indigo"},
+  {"actionName": "足球運動", "actionIcon": 9, "actionColor": "yellow"},
+  {"actionName": "游泳", "actionIcon": 10, "actionColor": "coral"},
+  {"actionName": "遠足", "actionIcon": 11, "actionColor": "gray"},
+  {"actionName": "蓋房子", "actionIcon": 12, "actionColor": "lime"},
+  {"actionName": "跑步比賽", "actionIcon": 13, "actionColor": "cyan"},
+  {"actionName": "籃球運動", "actionIcon": 14, "actionColor": "magenta"},
+  {"actionName": "做實驗", "actionIcon": 15, "actionColor": "lavender"},
+  {"actionName": "看電影", "actionIcon": 16, "actionColor": "gold"},
+  {"actionName": "網球運動", "actionIcon": 17, "actionColor": "salmon"},
+  {"actionName": "電腦工作", "actionIcon": 18, "actionColor": "navy"},
+  {"actionName": "休息", "actionIcon": 19, "actionColor": "silver"}
+]
