@@ -172,7 +172,12 @@ async function saveNewActivity(activityData) {
   }
 }
 
+// 重新載入數據
+async function reloadData() {
+  await loadData();
+}
+
 // 只載入一次
 loadData();
 
-export {itineraryData, isLoading, error, loadData, saveNewActivity};
+export {itineraryData, isLoading, error, loadData, saveNewActivity, reloadData};

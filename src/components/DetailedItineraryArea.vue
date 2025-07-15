@@ -22,18 +22,58 @@
       <WeekMode v-else-if="currentMode === 'week'" :selected-date="selectedDate" />
       <MonthMode v-else-if="currentMode === 'month'" :selected-date="selectedDate" />
     </div>
+
+    <!-- 週模式和月模式的新增活動按鈕 -->
+    <button
+      v-if="currentMode === 'week' || currentMode === 'month'"
+      class="add-activity-btn"
+      @click="showAddActivityPopup">
+      <span class="add-icon">+</span>
+    </button>
+
+    <!-- 新增活動視窗 -->
+    <AddActivityPopup
+      v-if="currentMode === 'week' || currentMode === 'month'"
+      :show="showAddPopup"
+      :available-icons="availableIcons"
+      @close="closeAddPopup"
+      @saved="handleActivitySaved" />
   </div>
 </template>
 
 <script setup>
-import {inject, computed, onMounted, watch} from "vue";
-import {isLoading, error, loadData} from "../services/dataService.js";
+import {inject, computed, onMounted, watch, ref} from "vue";
+import {isLoading, error, loadData, reloadData, itineraryData} from "../services/dataService.js";
 import DayMode from "./DayMode.vue";
 import WeekMode from "./WeekMode.vue";
 import MonthMode from "./MonthMode.vue";
+import AddActivityPopup from "./AddActivityPopup.vue";
 
 const selectedDate = inject("selectedDate");
 const currentMode = inject("currentMode");
+
+// 新增活動視窗狀態
+const showAddPopup = ref(false);
+
+// 獲取所有可用的圖標選項
+const availableIcons = computed(() => {
+  const iconSet = new Set();
+  const icons = [];
+
+  itineraryData.value.forEach(item => {
+    const key = `${item.icon}-${item.color}`;
+    if (!iconSet.has(key)) {
+      iconSet.add(key);
+      icons.push({
+        icon: item.icon,
+        color: item.color,
+        title: item.title,
+      });
+    }
+  });
+
+  return icons;
+});
 
 const weekMap = ["日", "一", "二", "三", "四", "五", "六"];
 const formattedDate = computed(() => {
@@ -48,6 +88,20 @@ watch(selectedDate, () => {
 onMounted(() => {
   loadData();
 });
+
+function showAddActivityPopup() {
+  console.log("新增活動");
+  showAddPopup.value = true;
+}
+
+function closeAddPopup() {
+  showAddPopup.value = false;
+}
+
+async function handleActivitySaved() {
+  console.log("活動已保存");
+  await reloadData();
+}
 </script>
 
 <style scoped>
@@ -58,6 +112,7 @@ onMounted(() => {
   padding: 1.2em 1em;
   flex-grow: 1;
   margin: 0 1em;
+  position: relative;
 }
 
 .date-title {
@@ -119,5 +174,35 @@ onMounted(() => {
 
 .retry-btn:hover {
   background: #2980b9;
+}
+
+/* 新增活動按鈕 */
+.add-activity-btn {
+  position: absolute;
+  bottom: 1em;
+  right: 1em;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #3498db;
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-activity-btn:hover {
+  background: #2980b9;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
+.add-icon {
+  font-size: 1.5em;
+  font-weight: bold;
 }
 </style>

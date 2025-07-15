@@ -1,7 +1,7 @@
 <template>
   <div class="day-mode-container">
     <div class="day-content">
-      <div v-for="(item, idx) in itineraryList" :key="idx" class="itinerary-row">
+      <div v-for="(item, idx) in itineraryList" :key="idx" class="itinerary-row" @click="editActivity(item)">
         <div class="icon-area">
           <span v-html="item.icon" class="itinerary-icon" :style="{color: item.color}"></span>
         </div>
@@ -27,13 +27,23 @@
       :available-icons="availableIcons"
       @close="closeAddPopup"
       @saved="handleActivitySaved" />
+
+    <!-- 編輯活動視窗 -->
+    <EditActivityPopup
+      :show="showEditPopup"
+      :available-icons="availableIcons"
+      :activity-to-edit="activityToEdit"
+      @close="closeEditPopup"
+      @saved="handleActivitySaved"
+      @deleted="handleActivityDeleted" />
   </div>
 </template>
 
 <script setup>
 import {computed, ref} from "vue";
-import {itineraryData} from "../services/dataService.js";
+import {itineraryData, reloadData} from "../services/dataService.js";
 import AddActivityPopup from "./AddActivityPopup.vue";
+import EditActivityPopup from "./EditActivityPopup.vue";
 
 const props = defineProps({
   selectedDate: {
@@ -44,6 +54,10 @@ const props = defineProps({
 
 // 新增活動視窗狀態
 const showAddPopup = ref(false);
+
+// 編輯活動視窗狀態
+const showEditPopup = ref(false);
+const activityToEdit = ref(null);
 
 // 獲取所有可用的圖標選項
 const availableIcons = computed(() => {
@@ -98,9 +112,27 @@ function closeAddPopup() {
   showAddPopup.value = false;
 }
 
-function handleActivitySaved() {
+async function handleActivitySaved() {
   console.log("活動已保存");
-  // 可以在這裡添加額外的處理邏輯，比如重新載入數據等
+  // 重新載入數據以確保顯示最新狀態
+  await reloadData();
+}
+
+function editActivity(activity) {
+  console.log("編輯活動:", activity);
+  activityToEdit.value = activity;
+  showEditPopup.value = true;
+}
+
+function closeEditPopup() {
+  showEditPopup.value = false;
+  activityToEdit.value = null;
+}
+
+async function handleActivityDeleted() {
+  console.log("活動已刪除");
+  // 重新載入數據以確保顯示最新狀態
+  await reloadData();
 }
 </script>
 
@@ -122,6 +154,12 @@ function handleActivitySaved() {
   border-bottom: 1px solid #f0f0f0;
   padding: 0.7em 0.2em 0.7em 0.2em;
   min-height: 54px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.itinerary-row:hover {
+  background-color: #f8f9fa;
 }
 
 .itinerary-row:last-child {

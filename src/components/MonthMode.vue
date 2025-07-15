@@ -3,7 +3,7 @@
     <div class="calendar-grid">
       <div v-for="day in monthDays" :key="day.key" class="calendar-cell">
         <div class="cell-date">{{ day.label }}</div>
-        <div v-for="(item, i) in day.items.slice(0, 3)" :key="i" class="cell-item">
+        <div v-for="(item, i) in day.items.slice(0, 3)" :key="i" class="cell-item" @click="editActivity(item)">
           <div class="cell-title" :style="{color: item.color}">
             {{ item.title }} {{ formatStartTime(item.startTime) }}
           </div>
@@ -22,7 +22,7 @@
           <button class="popup-close" @click="closePopup">×</button>
         </div>
         <div class="popup-body">
-          <div v-for="(item, i) in popupData?.items" :key="i" class="popup-itinerary-row">
+          <div v-for="(item, i) in popupData?.items" :key="i" class="popup-itinerary-row" @click="editActivity(item)">
             <div class="popup-icon-area">
               <span v-html="item.icon" class="popup-itinerary-icon" :style="{color: item.color}"></span>
             </div>
@@ -37,12 +37,22 @@
         </div>
       </div>
     </div>
+
+    <!-- 編輯活動視窗 -->
+    <EditActivityPopup
+      :show="showEditPopup"
+      :available-icons="availableIcons"
+      :activity-to-edit="activityToEdit"
+      @close="closeEditPopup"
+      @saved="handleActivitySaved"
+      @deleted="handleActivityDeleted" />
   </div>
 </template>
 
 <script setup>
 import {computed, ref} from "vue";
-import {itineraryData} from "../services/dataService.js";
+import {itineraryData, reloadData} from "../services/dataService.js";
+import EditActivityPopup from "./EditActivityPopup.vue";
 
 const props = defineProps({
   selectedDate: {
@@ -55,6 +65,30 @@ const props = defineProps({
 const showPopup = ref(false);
 const popupData = ref(null);
 const popupPosition = ref({x: 0, y: 0});
+
+// 編輯活動視窗狀態
+const showEditPopup = ref(false);
+const activityToEdit = ref(null);
+
+// 獲取所有可用的圖標選項
+const availableIcons = computed(() => {
+  const iconSet = new Set();
+  const icons = [];
+
+  itineraryData.value.forEach(item => {
+    const key = `${item.icon}-${item.color}`;
+    if (!iconSet.has(key)) {
+      iconSet.add(key);
+      icons.push({
+        icon: item.icon,
+        color: item.color,
+        title: item.title,
+      });
+    }
+  });
+
+  return icons;
+});
 
 const weekMap = ["日", "一", "二", "三", "四", "五", "六"];
 
@@ -99,6 +133,29 @@ function showDayPopup(event, dayData) {
 function closePopup() {
   showPopup.value = false;
   popupData.value = null;
+}
+
+function editActivity(activity) {
+  console.log("編輯活動:", activity);
+  activityToEdit.value = activity;
+  showEditPopup.value = true;
+  // 關閉當前的彈出視窗
+  closePopup();
+}
+
+function closeEditPopup() {
+  showEditPopup.value = false;
+  activityToEdit.value = null;
+}
+
+async function handleActivitySaved() {
+  console.log("活動已保存");
+  await reloadData();
+}
+
+async function handleActivityDeleted() {
+  console.log("活動已刪除");
+  await reloadData();
 }
 
 // 月曆格子資料
@@ -155,6 +212,7 @@ const monthDays = computed(() => {
   flex-direction: column;
   align-items: flex-start;
   overflow: hidden;
+  position: relative;
 }
 
 .cell-date {
@@ -172,6 +230,14 @@ const monthDays = computed(() => {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-radius: 4px;
+  padding: 0.3em;
+}
+
+.cell-item:hover {
+  background-color: #f0f0f0;
 }
 
 .cell-item:last-of-type {
@@ -291,6 +357,12 @@ const monthDays = computed(() => {
   border-bottom: 1px solid #f0f0f0;
   padding: 0.7em 0.2em 0.7em 0.2em;
   min-height: 54px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.popup-itinerary-row:hover {
+  background-color: #f8f9fa;
 }
 
 .popup-itinerary-row:last-child {

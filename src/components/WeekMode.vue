@@ -3,7 +3,7 @@
     <div class="calendar-grid">
       <div v-for="day in weekDays" :key="day.key" class="calendar-cell">
         <div class="cell-date">{{ day.label }}</div>
-        <div v-for="(item, i) in day.items" :key="i" class="cell-item">
+        <div v-for="(item, i) in day.items" :key="i" class="cell-item" @click="editActivity(item)">
           <div class="cell-title" :style="{color: item.color}">{{ item.title }}</div>
           <div class="cell-time">{{ formatTimeRange(item.startTime) }} -</div>
           <div class="cell-time">{{ formatTimeRange(item.endTime) }}</div>
@@ -12,12 +12,22 @@
         <div v-if="day.items.length === 0" class="cell-more">—</div>
       </div>
     </div>
+
+    <!-- 編輯活動視窗 -->
+    <EditActivityPopup
+      :show="showEditPopup"
+      :available-icons="availableIcons"
+      :activity-to-edit="activityToEdit"
+      @close="closeEditPopup"
+      @saved="handleActivitySaved"
+      @deleted="handleActivityDeleted" />
   </div>
 </template>
 
 <script setup>
-import {computed} from "vue";
-import {itineraryData} from "../services/dataService.js";
+import {computed, ref} from "vue";
+import {itineraryData, reloadData} from "../services/dataService.js";
+import EditActivityPopup from "./EditActivityPopup.vue";
 
 const props = defineProps({
   selectedDate: {
@@ -27,6 +37,30 @@ const props = defineProps({
 });
 
 const weekMap = ["日", "一", "二", "三", "四", "五", "六"];
+
+// 編輯活動視窗狀態
+const showEditPopup = ref(false);
+const activityToEdit = ref(null);
+
+// 獲取所有可用的圖標選項
+const availableIcons = computed(() => {
+  const iconSet = new Set();
+  const icons = [];
+
+  itineraryData.value.forEach(item => {
+    const key = `${item.icon}-${item.color}`;
+    if (!iconSet.has(key)) {
+      iconSet.add(key);
+      icons.push({
+        icon: item.icon,
+        color: item.color,
+        title: item.title,
+      });
+    }
+  });
+
+  return icons;
+});
 
 function formatTimeRange(timeRange) {
   if (!timeRange) return "";
@@ -102,6 +136,27 @@ const weekDays = computed(() => {
     };
   });
 });
+
+function editActivity(activity) {
+  console.log("編輯活動:", activity);
+  activityToEdit.value = activity;
+  showEditPopup.value = true;
+}
+
+function closeEditPopup() {
+  showEditPopup.value = false;
+  activityToEdit.value = null;
+}
+
+async function handleActivitySaved() {
+  console.log("活動已保存");
+  await reloadData();
+}
+
+async function handleActivityDeleted() {
+  console.log("活動已刪除");
+  await reloadData();
+}
 </script>
 
 <style scoped>
@@ -127,6 +182,7 @@ const weekDays = computed(() => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  position: relative;
   /* 移除 max-height 與 overflow-y */
 }
 
@@ -142,6 +198,14 @@ const weekDays = computed(() => {
   margin-bottom: 0.3em;
   padding: 0.2em 0;
   border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-radius: 4px;
+  padding: 0.3em;
+}
+
+.cell-item:hover {
+  background-color: #f0f0f0;
 }
 
 .cell-item:last-of-type {
