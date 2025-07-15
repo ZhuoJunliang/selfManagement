@@ -21,7 +21,7 @@
           <path d="m321-80-71-71 329-329-329-329 71-71 400 400L321-80Z" />
         </svg>
       </div>
-      <div class="selectedTime">
+      <div @click="handleSelectedTimeClick" class="selectedTime">
         <span class="selectedTimeYear">{{ currentYear }}年</span
         ><span class="selectedTimeMonth">{{ currentMonth + 1 }}月</span
         ><span class="selectedTimeDay">{{ currentDay }}日</span>
@@ -56,31 +56,31 @@
           <li v-for="(mode, idx) in currentMode" :key="mode" @click="selectMode(idx)">{{ mode }}</li>
         </ul>
       </div>
-      <div class="schedule titleIconBtn">
+      <div @click="handleFunctionClick('schedule')" class="schedule titleIconBtn">
         <svg xmlns="http://www.w3.org/2000/svg" height="1.5em" viewBox="0 -960 960 960" width="1.5em" fill="#1f1f1f">
           <path
             d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h168q13-36 43.5-58t68.5-22q38 0 68.5 22t43.5 58h168q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm80-80h280v-80H280v80Zm0-160h400v-80H280v80Zm0-160h400v-80H280v80Zm200-190q13 0 21.5-8.5T510-820q0-13-8.5-21.5T480-850q-13 0-21.5 8.5T450-820q0 13 8.5 21.5T480-790ZM200-200v-560 560Z" />
         </svg>
       </div>
-      <div class="routineWork titleIconBtn">
+      <div @click="handleFunctionClick('routineWork')" class="routineWork titleIconBtn">
         <svg xmlns="http://www.w3.org/2000/svg" height="1.5em" viewBox="0 -960 960 960" width="1.5em" fill="#1f1f1f">
           <path
             d="M480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-800q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Zm0-360Zm112 168 56-56-128-128v-184h-80v216l152 152ZM224-866l56 56-170 170-56-56 170-170Zm512 0 170 170-56 56-170-170 56-56ZM480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720q-117 0-198.5 81.5T200-440q0 117 81.5 198.5T480-160Z" />
         </svg>
       </div>
-      <div class="statistics titleIconBtn">
+      <div @click="handleFunctionClick('statistics')" class="statistics titleIconBtn">
         <svg xmlns="http://www.w3.org/2000/svg" height="1.5em" viewBox="0 -960 960 960" width="1.5em" fill="#1f1f1f">
           <path
             d="M280-280h80v-200h-80v200Zm320 0h80v-400h-80v400Zm-160 0h80v-120h-80v120Zm0-200h80v-80h-80v80ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z" />
         </svg>
       </div>
-      <div class="importantJob titleIconBtn">
+      <div @click="handleFunctionClick('importantJob')" class="importantJob titleIconBtn">
         <svg xmlns="http://www.w3.org/2000/svg" height="1.5em" viewBox="0 -960 960 960" width="1.5em" fill="#1f1f1f">
           <path
             d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h168q13-36 43.5-58t68.5-22q38 0 68.5 22t43.5 58h168q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm280-590q13 0 21.5-8.5T510-820q0-13-8.5-21.5T480-850q-13 0-21.5 8.5T450-820q0 13 8.5 21.5T480-790ZM200-200v-560 560Z" />
         </svg>
       </div>
-      <div class="AccountCircle titleIconBtn">
+      <div @click="handleFunctionClick('AccountCircle')" class="AccountCircle titleIconBtn">
         <svg xmlns="http://www.w3.org/2000/svg" height="1.5em" viewBox="0 -960 960 960" width="1.5em" fill="#1f1f1f">
           <path
             d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm246-164q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Zm0 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q53 0 100-15.5t86-44.5q-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160Zm0-360q26 0 43-17t17-43q0-26-17-43t-43-17q-26 0-43 17t-17 43q0 26 17 43t43 17Zm0-60Zm0 360Z" />
@@ -99,6 +99,9 @@ const today = inject("today");
 const changeDay = inject("changeDay");
 const selectToday = inject("selectToday");
 const toggleCalendar = inject("toggleCalendar");
+const showSidebar = inject("showSidebar");
+const showMainContent = inject("showMainContent");
+const switchSidebarComponent = inject("switchSidebarComponent");
 
 // 計算屬性來獲取當前日期的年月日
 const currentYear = computed(() => selectedDate.value.getFullYear());
@@ -178,6 +181,16 @@ function toggleDropdown() {
 function selectMode(idx) {
   currentModeIndex.value = idx;
   dropdownOpen.value = false;
+}
+
+function handleFunctionClick(functionType) {
+  console.log(`點擊了 ${functionType} 功能`);
+  switchSidebarComponent(functionType);
+}
+
+function handleSelectedTimeClick() {
+  console.log("點擊了選定時間");
+  showMainContent();
 }
 
 function handleClickOutside(event) {
@@ -271,6 +284,22 @@ h1 img {
   display: flex;
   justify-content: space-around;
   align-items: center;
+}
+
+.selectedTime {
+  cursor: pointer;
+  padding: 0.5em;
+  border-radius: 8px;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.selectedTime:hover {
+  background: hsl(0, 0%, 80%);
+}
+
+.selectedTime:active {
+  background: hsl(0, 0%, 60%);
 }
 
 /* NOTE: 右側功能區 */

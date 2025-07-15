@@ -193,8 +193,9 @@ const calendarRows = computed(() => {
 /* 小螢幕樣式 */
 @media (max-width: 576px) {
   .calendar-area {
-    width: 100%;
+    width: calc(100% - 2em);
     margin: 0 1em;
+    min-height: calc(100vh - 200px);
   }
 
   .calendar-day {

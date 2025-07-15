@@ -115,6 +115,16 @@ async function handleActivitySaved() {
   position: relative;
 }
 
+/* 小螢幕樣式 */
+@media (max-width: 576px) {
+  .detailed-itinerary-area {
+    flex-grow: 0;
+    width: calc(100% - 2em);
+    margin: 0 1em;
+    min-height: calc(100vh - 200px);
+  }
+}
+
 .date-title {
   font-size: 1.1em;
   font-weight: bold;
@@ -127,6 +137,13 @@ async function handleActivitySaved() {
 .mode-container {
   height: calc(100vh - 250px);
   overflow: hidden;
+}
+
+/* 小螢幕樣式 */
+@media (max-width: 576px) {
+  .mode-container {
+    height: calc(100vh - 300px);
+  }
 }
 
 .loading-state {
