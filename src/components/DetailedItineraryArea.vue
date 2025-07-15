@@ -16,55 +16,37 @@
       <button @click="loadData" class="retry-btn">重新載入</button>
     </div>
 
-    <!-- 資料顯示 -->
-    <div v-else>
-      <div v-for="(item, idx) in itineraryList" :key="idx" class="itinerary-row">
-        <div class="icon-area">
-          <component :is="item.icon" v-if="item.iconType === 'component'" class="itinerary-icon" />
-          <span v-else v-html="item.icon" class="itinerary-icon"></span>
-        </div>
-        <div class="content-area">
-          <div class="content-title">{{ item.title }}</div>
-          <div class="content-time">{{ item.timeRange }}</div>
-        </div>
-        <div class="duration-area">
-          {{ item.duration }}
-        </div>
-      </div>
-
-      <!-- 無資料狀態 -->
-      <div v-if="itineraryList.length === 0" class="empty-state">
-        <p>目前沒有行程資料</p>
-      </div>
+    <!-- 根據模式顯示不同組件 -->
+    <div v-else class="mode-container">
+      <DayMode v-if="currentMode === 'day'" :selected-date="selectedDate" />
+      <WeekMode v-else-if="currentMode === 'week'" :selected-date="selectedDate" />
+      <MonthMode v-else-if="currentMode === 'month'" :selected-date="selectedDate" />
     </div>
   </div>
 </template>
 
 <script setup>
-import {inject, computed, onMounted, onBeforeUnmount} from "vue";
-import {itineraryData, isLoading, error, loadData, startAutoReload, stopAutoReload} from "../services/dataService.js";
+import {inject, computed, onMounted, watch} from "vue";
+import {isLoading, error, loadData} from "../services/dataService.js";
+import DayMode from "./DayMode.vue";
+import WeekMode from "./WeekMode.vue";
+import MonthMode from "./MonthMode.vue";
 
-// inject 選定日期
 const selectedDate = inject("selectedDate");
+const currentMode = inject("currentMode");
 
-// 日期格式化
 const weekMap = ["日", "一", "二", "三", "四", "五", "六"];
 const formattedDate = computed(() => {
   const d = selectedDate.value;
   return `${d.getMonth() + 1}月${d.getDate()}日, 星期${weekMap[d.getDay()]}`;
 });
 
-// 使用資料服務中的行程資料
-const itineraryList = computed(() => itineraryData.value);
-
-// 組件掛載時啟動自動重新載入
-onMounted(() => {
-  startAutoReload();
+watch(selectedDate, () => {
+  loadData();
 });
 
-// 組件卸載時停止自動重新載入
-onBeforeUnmount(() => {
-  stopAutoReload();
+onMounted(() => {
+  loadData();
 });
 </script>
 
@@ -74,9 +56,10 @@ onBeforeUnmount(() => {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   padding: 1.2em 1em;
-  max-width: 420px;
-  margin: 1em auto;
+  flex-grow: 1;
+  margin: 0 1em;
 }
+
 .date-title {
   font-size: 1.1em;
   font-weight: bold;
@@ -85,52 +68,12 @@ onBeforeUnmount(() => {
   padding-bottom: 0.5em;
   margin-bottom: 0.7em;
 }
-.itinerary-row {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #f0f0f0;
-  padding: 0.7em 0;
-}
-.itinerary-row:last-child {
-  border-bottom: none;
-}
-.icon-area {
-  flex: 0 0 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 0.7em;
-}
-.itinerary-icon {
-  width: 24px;
-  height: 24px;
-  display: block;
-}
-.content-area {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.content-title {
-  font-size: 1em;
-  color: #222;
-  font-weight: 500;
-}
-.content-time {
-  font-size: 0.92em;
-  color: #888;
-  margin-top: 0.1em;
-}
-.duration-area {
-  flex: 0 0 48px;
-  text-align: right;
-  font-size: 1.1em;
-  color: #444;
-  font-variant-numeric: tabular-nums;
+
+.mode-container {
+  height: calc(100vh - 250px);
+  overflow: hidden;
 }
 
-/* 載入狀態樣式 */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -158,7 +101,6 @@ onBeforeUnmount(() => {
   }
 }
 
-/* 錯誤狀態樣式 */
 .error-state {
   text-align: center;
   padding: 2em 0;
@@ -177,12 +119,5 @@ onBeforeUnmount(() => {
 
 .retry-btn:hover {
   background: #2980b9;
-}
-
-/* 無資料狀態樣式 */
-.empty-state {
-  text-align: center;
-  padding: 2em 0;
-  color: #999;
 }
 </style>

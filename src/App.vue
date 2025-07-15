@@ -8,10 +8,38 @@
 </template>
 
 <script setup>
-import {ref, provide} from "vue";
+import {ref, provide, watch, onMounted} from "vue";
 
-// 共享的日期狀態
-const selectedDate = ref(new Date());
+// 從 sessionStorage 讀取初始資料的函數
+function loadFromSessionStorage() {
+  try {
+    // 讀取選定的日期
+    const savedDate = sessionStorage.getItem("selectedDate");
+    if (savedDate) {
+      return new Date(parseInt(savedDate));
+    }
+  } catch (error) {
+    console.error("讀取 sessionStorage 中的日期失敗:", error);
+  }
+  return new Date();
+}
+
+// 從 sessionStorage 讀取模式索引
+function loadModeIndexFromSessionStorage() {
+  try {
+    const savedModeIndex = sessionStorage.getItem("currentModeIndex");
+    if (savedModeIndex !== null) {
+      const index = parseInt(savedModeIndex);
+      return index >= 0 && index <= 2 ? index : 0;
+    }
+  } catch (error) {
+    console.error("讀取 sessionStorage 中的模式索引失敗:", error);
+  }
+  return 0;
+}
+
+// 共享的日期狀態 - 從 sessionStorage 初始化
+const selectedDate = ref(loadFromSessionStorage());
 const today = new Date();
 
 // 控制 CalendarArea 顯示/隱藏的狀態
@@ -37,6 +65,35 @@ const toggleCalendar = () => {
   calendarVisible.value = !calendarVisible.value;
 };
 
+// 模式管理 - 從 sessionStorage 初始化
+const modeMap = ["day", "week", "month"];
+const currentModeIndex = ref(loadModeIndexFromSessionStorage());
+const currentMode = ref(modeMap[currentModeIndex.value]);
+
+// 監聽模式索引變更
+watch(currentModeIndex, val => {
+  currentMode.value = modeMap[val];
+  // 儲存到 sessionStorage
+  try {
+    sessionStorage.setItem("currentModeIndex", val.toString());
+  } catch (error) {
+    console.error("儲存模式索引到 sessionStorage 失敗:", error);
+  }
+});
+
+// 監聽選定日期變更並儲存到 sessionStorage
+watch(
+  selectedDate,
+  newDate => {
+    try {
+      sessionStorage.setItem("selectedDate", newDate.getTime().toString());
+    } catch (error) {
+      console.error("儲存選定日期到 sessionStorage 失敗:", error);
+    }
+  },
+  {deep: true}
+);
+
 // 提供給子組件使用的狀態和函數
 provide("selectedDate", selectedDate);
 provide("today", today);
@@ -45,6 +102,8 @@ provide("changeDay", changeDay);
 provide("selectToday", selectToday);
 provide("calendarVisible", calendarVisible);
 provide("toggleCalendar", toggleCalendar);
+provide("currentMode", currentMode);
+provide("currentModeIndex", currentModeIndex);
 </script>
 
 <style>
@@ -70,5 +129,14 @@ provide("toggleCalendar", toggleCalendar);
 *::before,
 *::after {
   box-sizing: inherit;
+}
+
+main {
+  display: flex;
+  justify-content: flex-start;
+}
+
+DetailedItineraryArea {
+  flex-grow: 1;
 }
 </style>

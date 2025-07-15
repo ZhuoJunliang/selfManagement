@@ -105,8 +105,8 @@ const currentYear = computed(() => selectedDate.value.getFullYear());
 const currentMonth = computed(() => selectedDate.value.getMonth());
 const currentDay = computed(() => selectedDate.value.getDate());
 
-let currentMode = ref(["天", "週", "月"]);
-let currentModeIndex = ref(0);
+const currentMode = ref(["天", "週", "月"]);
+const currentModeIndex = inject("currentModeIndex");
 
 function setDay(value) {
   // 根據當前模式調整日期增減幅度
