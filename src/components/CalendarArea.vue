@@ -189,4 +189,22 @@ const calendarRows = computed(() => {
   background: #f0f0f0;
   color: #666;
 }
+
+/* 小螢幕樣式 */
+@media (max-width: 576px) {
+  .calendar-area {
+    width: 100%;
+    margin: 0 1em;
+  }
+
+  .calendar-day {
+    width: 2.5em;
+    height: 2.5em;
+    line-height: 2.5em;
+  }
+
+  .calendar-table td {
+    height: 2.8em;
+  }
+}
 </style>

@@ -3,12 +3,12 @@
   <main>
     <CalendarArea v-if="calendarVisible" />
     <!-- <MyTest /> -->
-    <DetailedItineraryArea />
+    <DetailedItineraryArea v-if="detailedItineraryVisible" />
   </main>
 </template>
 
 <script setup>
-import {ref, provide, watch, onMounted} from "vue";
+import {ref, provide, watch, onMounted, onUnmounted} from "vue";
 
 // 從 sessionStorage 讀取初始資料的函數
 function loadFromSessionStorage() {
@@ -42,8 +42,27 @@ function loadModeIndexFromSessionStorage() {
 const selectedDate = ref(loadFromSessionStorage());
 const today = new Date();
 
-// 控制 CalendarArea 顯示/隱藏的狀態
+// 控制 CalendarArea 和 DetailedItineraryArea 顯示/隱藏的狀態
 const calendarVisible = ref(true);
+const detailedItineraryVisible = ref(true);
+
+// 螢幕寬度狀態
+const isSmallScreen = ref(false);
+
+// 檢查螢幕寬度並更新狀態
+function checkScreenSize() {
+  isSmallScreen.value = window.innerWidth < 576;
+
+  if (isSmallScreen.value) {
+    // 小螢幕時預設隱藏日曆區域
+    calendarVisible.value = false;
+    detailedItineraryVisible.value = true;
+  } else {
+    // 大螢幕時兩個區域都顯示
+    calendarVisible.value = true;
+    detailedItineraryVisible.value = true;
+  }
+}
 
 // 提供給子組件的日期操作函數
 const selectDate = date => {
@@ -60,9 +79,14 @@ const selectToday = () => {
   selectedDate.value = new Date(today);
 };
 
-// 切換 CalendarArea 顯示/隱藏的函數
+// 切換 CalendarArea 和 DetailedItineraryArea 顯示/隱藏的函數
 const toggleCalendar = () => {
-  calendarVisible.value = !calendarVisible.value;
+  if (isSmallScreen.value) {
+    // 小螢幕時切換顯示
+    calendarVisible.value = !calendarVisible.value;
+    detailedItineraryVisible.value = !detailedItineraryVisible.value;
+  }
+  // 大螢幕時不執行任何操作，保持兩個區域都顯示
 };
 
 // 模式管理 - 從 sessionStorage 初始化
@@ -104,6 +128,16 @@ provide("calendarVisible", calendarVisible);
 provide("toggleCalendar", toggleCalendar);
 provide("currentMode", currentMode);
 provide("currentModeIndex", currentModeIndex);
+
+// 監聽視窗大小變化
+onMounted(() => {
+  checkScreenSize();
+  window.addEventListener("resize", checkScreenSize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", checkScreenSize);
+});
 </script>
 
 <style>
@@ -138,5 +172,21 @@ main {
 
 DetailedItineraryArea {
   flex-grow: 1;
+}
+
+/* 小螢幕樣式 */
+@media (max-width: 576px) {
+  main {
+    flex-direction: column;
+  }
+
+  .calendar-area {
+    width: 100% !important;
+    margin: 0 1em;
+  }
+
+  .detailed-itinerary-area {
+    margin: 0 1em;
+  }
 }
 </style>
