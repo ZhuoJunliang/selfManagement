@@ -395,6 +395,14 @@ function selectNumber(number) {
   closeNumberPicker();
 }
 
+// 在 <script setup> 內部加上這個 function
+function formatDateToInputValue(dateObj) {
+  const y = dateObj.getFullYear();
+  const m = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+  const d = dateObj.getDate().toString().padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 // 監聽 show prop 變化，初始化表單
 watch(
   () => props.show,
@@ -408,10 +416,10 @@ watch(
         title: activity.title,
         icon: activity.icon,
         color: activity.color,
-        startDate: startDate.toISOString().split("T")[0],
+        startDate: formatDateToInputValue(startDate),
         startHour: startDate.getHours().toString().padStart(2, "0"),
         startMinute: startDate.getMinutes().toString().padStart(2, "0"),
-        endDate: endDate.toISOString().split("T")[0],
+        endDate: formatDateToInputValue(endDate),
         endHour: endDate.getHours().toString().padStart(2, "0"),
         endMinute: endDate.getMinutes().toString().padStart(2, "0"),
         originalIndex: -1,
