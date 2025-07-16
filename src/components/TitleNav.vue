@@ -229,6 +229,11 @@ onBeforeUnmount(() => {
   align-items: center;
   padding: 0 1em;
   background-color: #f0f0f0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 1000;
 }
 
 h1 img {

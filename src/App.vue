@@ -1,6 +1,6 @@
 <template>
-  <TitleNav />
-  <main>
+  <TitleNav ref="titleNavRef" />
+  <main :style="{paddingTop: mainPaddingTop + 'px'}">
     <CalendarArea v-if="calendarVisible" />
     <!-- <MyTest /> -->
     <DetailedItineraryArea v-if="detailedItineraryVisible" />
@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import {ref, provide, watch, onMounted, onUnmounted} from "vue";
+import {ref, provide, watch, onMounted, onUnmounted, nextTick} from "vue";
 import TitleNav from "./components/TitleNav.vue";
 import RightSidebar from "./components/RightSidebar.vue";
 
@@ -219,6 +219,17 @@ const checkLoginStatus = () => {
   }
 };
 
+const titleNavRef = ref(null);
+const mainPaddingTop = ref(60);
+
+function updatePadding() {
+  nextTick(() => {
+    if (titleNavRef.value?.$el) {
+      mainPaddingTop.value = titleNavRef.value.$el.offsetHeight;
+    }
+  });
+}
+
 // 監聽視窗大小變化
 onMounted(() => {
   checkScreenSize();
@@ -227,10 +238,13 @@ onMounted(() => {
   if (window.innerWidth >= 576) {
     sidebarVisible.value = true;
   }
+  updatePadding();
+  window.addEventListener("resize", updatePadding);
   window.addEventListener("resize", checkScreenSize);
 });
 
 onUnmounted(() => {
+  window.removeEventListener("resize", updatePadding);
   window.removeEventListener("resize", checkScreenSize);
 });
 </script>
