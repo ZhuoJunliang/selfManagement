@@ -122,8 +122,8 @@ const showSidebar = () => {
 const switchSidebarComponent = componentName => {
   if (currentSidebarComponent.value === componentName) {
     if (isSmallScreen.value) {
-      // 小螢幕時，重複點擊同一個功能不收起側邊欄
-      return;
+      // 小螢幕時，重複點擊同一個功能也要顯示側邊欄
+      showSidebar();
     } else {
       // 大螢幕時，切換顯示/隱藏
       if (sidebarVisible.value) {
