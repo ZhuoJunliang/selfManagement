@@ -1,15 +1,17 @@
 <template>
   <div class="week-mode-container">
-    <div class="calendar-grid">
-      <div v-for="day in weekDays" :key="day.key" class="calendar-cell">
-        <div class="cell-date">{{ day.label }}</div>
-        <div v-for="(item, i) in day.items" :key="i" class="cell-item" @click="editActivity(item)">
-          <div class="cell-title" :style="{color: item.color}">{{ item.title }}</div>
-          <div class="cell-time">{{ formatTimeRange(item.startTime) }} -</div>
-          <div class="cell-time">{{ formatTimeRange(item.endTime) }}</div>
-          <div class="cell-duration">{{ calculateDuration(item.startTime, item.endTime) }}</div>
+    <div class="calendar-grid-wrapper">
+      <div class="calendar-grid">
+        <div v-for="day in weekDays" :key="day.key" class="calendar-cell">
+          <div class="cell-date">{{ day.label }}</div>
+          <div v-for="(item, i) in day.items" :key="i" class="cell-item" @click="editActivity(item)">
+            <div class="cell-title" :style="{color: item.color}">{{ item.title }}</div>
+            <div class="cell-time">{{ formatTimeRange(item.startTime) }} -</div>
+            <div class="cell-time">{{ formatTimeRange(item.endTime) }}</div>
+            <div class="cell-duration">{{ calculateDuration(item.startTime, item.endTime) }}</div>
+          </div>
+          <div v-if="day.items.length === 0" class="cell-more">—</div>
         </div>
-        <div v-if="day.items.length === 0" class="cell-more">—</div>
       </div>
     </div>
 
@@ -163,16 +165,26 @@ async function handleActivityDeleted() {
 .week-mode-container {
   height: 100%;
   min-height: 400px;
-  overflow-y: auto; /* 超出時可垂直捲動 */
+  overflow-y: auto;
 }
 
+/* 新增 wrapper，負責橫向捲動 */
+.calendar-grid-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* calendar-grid 設定最小寬度，7天*每格最小寬度 */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.5em;
+  min-width: 840px; /* 7 * 120px，依你 min-width 調整 */
 }
 
+/* calendar-cell 設定最小寬度 */
 .calendar-cell {
+  min-width: 120px;
   background: #fafbfc;
   border-radius: 6px;
   min-height: 120px;
@@ -183,7 +195,6 @@ async function handleActivityDeleted() {
   flex-direction: column;
   align-items: flex-start;
   position: relative;
-  /* 移除 max-height 與 overflow-y */
 }
 
 .cell-date {

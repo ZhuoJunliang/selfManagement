@@ -1,8 +1,8 @@
 <template>
   <div class="detailed-itinerary-area">
-    <div class="date-title">
+    <!-- <div class="date-title">
       {{ formattedDate }}
-    </div>
+    </div> -->
 
     <!-- 未登入狀態 -->
     <div v-if="!isLoggedIn" class="login-required-state">
@@ -140,6 +140,7 @@ function goToLogin() {
   flex-grow: 1;
   margin: 0 1em;
   position: relative;
+  height: calc(100vh - 150px);
 }
 
 /* 小螢幕樣式 */
@@ -148,7 +149,8 @@ function goToLogin() {
     flex-grow: 0;
     width: calc(100% - 2em);
     margin: 0 1em;
-    min-height: calc(100vh - 200px);
+    min-height: unset;
+    height: calc(100vh - 200px);
   }
 }
 

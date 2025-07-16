@@ -30,7 +30,7 @@ const currentSidebarComponent = inject("currentSidebarComponent");
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   padding: 1.2em 1em;
   width: 270px;
-  min-width: 270px;
+  min-width: 350px;
   height: calc(100vh - 150px);
   margin: 0 1em;
   overflow-y: auto;

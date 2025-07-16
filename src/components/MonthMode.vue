@@ -1,15 +1,17 @@
 <template>
   <div class="month-mode-container">
-    <div class="calendar-grid">
-      <div v-for="day in monthDays" :key="day.key" class="calendar-cell">
-        <div class="cell-date">{{ day.label }}</div>
-        <div v-for="(item, i) in day.items.slice(0, 3)" :key="i" class="cell-item" @click="editActivity(item)">
-          <div class="cell-title" :style="{color: item.color}">
-            {{ item.title }} {{ formatStartTime(item.startTime) }}
+    <div class="calendar-grid-wrapper">
+      <div class="calendar-grid">
+        <div v-for="day in monthDays" :key="day.key" class="calendar-cell">
+          <div class="cell-date">{{ day.label }}</div>
+          <div v-for="(item, i) in day.items.slice(0, 3)" :key="i" class="cell-item" @click="editActivity(item)">
+            <div class="cell-title" :style="{color: item.color}">
+              {{ item.title }} {{ formatStartTime(item.startTime) }}
+            </div>
           </div>
-        </div>
-        <div v-if="day.items.length > 1" class="cell-more" @click="showDayPopup($event, day)">
-          還有 {{ day.items.length - 1 }} 個
+          <div v-if="day.items.length > 1" class="cell-more" @click="showDayPopup($event, day)">
+            還有 {{ day.items.length - 1 }} 個
+          </div>
         </div>
       </div>
     </div>
@@ -195,13 +197,23 @@ const monthDays = computed(() => {
   overflow-y: auto;
 }
 
+/* 新增 wrapper，負責橫向捲動 */
+.calendar-grid-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* calendar-grid 設定最小寬度，7天*每格最小寬度 */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.5em;
+  min-width: 840px; /* 7 * 120px，依你 min-width 調整 */
 }
 
+/* calendar-cell 設定最小寬度 */
 .calendar-cell {
+  min-width: 120px;
   background: #fafbfc;
   border-radius: 6px;
   min-height: 120px;
