@@ -53,6 +53,10 @@ const sidebarVisible = ref(false);
 // 控制 RightSidebar 中顯示的組件
 const currentSidebarComponent = ref("schedule");
 
+// 登入狀態管理
+const isLoggedIn = ref(false);
+const currentUser = ref(null);
+
 // 螢幕寬度狀態
 const isSmallScreen = ref(false);
 
@@ -198,10 +202,27 @@ provide("closeSidebar", closeSidebar);
 provide("showMainContent", showMainContent);
 provide("currentSidebarComponent", currentSidebarComponent);
 provide("switchSidebarComponent", switchSidebarComponent);
+provide("isLoggedIn", isLoggedIn);
+provide("currentUser", currentUser);
+
+// 檢查登入狀態
+const checkLoginStatus = () => {
+  const storedUser = localStorage.getItem("currentUser");
+  if (storedUser) {
+    try {
+      const user = JSON.parse(storedUser);
+      currentUser.value = user;
+      isLoggedIn.value = true;
+    } catch (e) {
+      console.error("解析存儲的用戶信息失敗:", e);
+    }
+  }
+};
 
 // 監聽視窗大小變化
 onMounted(() => {
   checkScreenSize();
+  checkLoginStatus();
   // 如果初始螢幕寬度大於576px，自動顯示側邊欄
   if (window.innerWidth >= 576) {
     sidebarVisible.value = true;
