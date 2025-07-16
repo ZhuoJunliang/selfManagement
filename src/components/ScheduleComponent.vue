@@ -364,13 +364,30 @@ async function doDelete(idx) {
   padding: 0.5em 1.2em;
   font-size: 1em;
   cursor: pointer;
-  transition: background 0.15s, border 0.15s;
+  transition: all 0.3s ease;
   margin-left: 0.5em;
+  transform: scale(1);
+}
+.delete-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(204, 0, 0, 0.2);
 }
 .delete-btn.confirm {
-  background: #ffeaea;
-  border-color: #e57373;
+  background: #c00;
+  border-color: #c00;
   color: #fff;
   font-weight: bold;
+  animation: confirmPulse 0.3s ease;
+}
+@keyframes confirmPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 </style>

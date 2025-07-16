@@ -54,9 +54,10 @@
             {{ saveError }}
           </div>
           <div class="form-buttons">
-            <button class="btn-delete" @click="deleteActivity" :disabled="isDeleting">
+            <button v-if="!confirmDelete" class="btn-delete" @click="askDelete" :disabled="isDeleting">
               {{ isDeleting ? "刪除中..." : "刪除" }}
             </button>
+            <button v-else class="btn-delete confirm" @click="deleteActivity">確認刪除？</button>
             <button class="btn-cancel" @click="closePopup">取消</button>
             <button
               class="btn-save"
@@ -142,6 +143,7 @@ const numberPickerMax = ref(59);
 const isSaving = ref(false);
 const isDeleting = ref(false);
 const saveError = ref("");
+const confirmDelete = ref(false); // 用於控制刪除確認狀態
 
 // 時間驗證
 const isEndTimeValid = computed(() => {
@@ -212,6 +214,7 @@ const formValidation = computed(() => {
 function closePopup() {
   emit("close");
   saveError.value = "";
+  confirmDelete.value = false;
 }
 
 function selectActivity(activity) {
@@ -257,11 +260,11 @@ async function saveActivity() {
   }
 }
 
-async function deleteActivity() {
-  if (!confirm("確定要刪除此活動嗎？")) {
-    return;
-  }
+function askDelete() {
+  confirmDelete.value = true;
+}
 
+async function deleteActivity() {
   isDeleting.value = true;
   saveError.value = "";
 
@@ -275,6 +278,7 @@ async function deleteActivity() {
     saveError.value = "刪除時發生錯誤：" + error.message;
   } finally {
     isDeleting.value = false;
+    confirmDelete.value = false;
   }
 }
 
@@ -425,6 +429,7 @@ watch(
         originalIndex: -1,
       };
       saveError.value = "";
+      confirmDelete.value = false;
     }
   }
 );
@@ -672,18 +677,43 @@ watch(
 }
 
 .btn-delete {
-  background: #e74c3c;
-  color: white;
+  background: #fff0f0;
+  color: #c00;
+  border: 1px solid #f5c2c2;
+  transition: all 0.3s ease;
 }
 
 .btn-delete:hover:not(:disabled) {
-  background: #c0392b;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(204, 0, 0, 0.2);
 }
 
 .btn-delete:disabled {
   background: #bdc3c7;
   color: #7f8c8d;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-delete.confirm {
+  background: #c00;
+  border-color: #c00;
+  color: #fff;
+  font-weight: bold;
+  animation: confirmPulse 0.3s ease;
+}
+
+@keyframes confirmPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* 數字選擇視窗 */

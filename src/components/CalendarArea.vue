@@ -122,6 +122,7 @@ const calendarRows = computed(() => {
   width: 270px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   font-family: inherit;
+  margin: 0 1em;
 }
 .calendar-header {
   display: flex;
