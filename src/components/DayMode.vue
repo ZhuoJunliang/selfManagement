@@ -146,6 +146,7 @@ async function handleActivityDeleted() {
 .day-content {
   height: 100%;
   overflow-y: auto;
+  padding-bottom: 60px; /* 新增這一行，確保底部有空間 */
 }
 
 .itinerary-row {

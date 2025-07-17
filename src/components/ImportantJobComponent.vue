@@ -9,6 +9,9 @@
         <option value="year">年</option>
       </select>
     </div>
+    <div style="margin-bottom: 0.5em; color: #666; font-size: 1.05em">
+      <h3>{{ rangeTitle }}重要工作</h3>
+    </div>
     <div class="component-content">
       <!-- 顯示 importantJob.txt 內容 -->
       <div v-if="importantJobs.length === 0">尚未設定重要工作</div>
@@ -30,7 +33,7 @@
         </li>
       </ul>
     </div>
-    <button class="add-btn" @click="openPopup">新增</button>
+    <button class="add-btn" @click="openPopup">修改</button>
     <div v-if="showPopup" class="popup-overlay">
       <div class="popup">
         <h3>選擇重要工作</h3>
@@ -86,6 +89,14 @@ const rangeDays = computed(() => {
     return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 366 : 365;
   }
   return 1;
+});
+// 新增：根據選擇區間顯示標題
+const rangeTitle = computed(() => {
+  if (selectedRange.value === "day") return "當日";
+  if (selectedRange.value === "week") return "本週";
+  if (selectedRange.value === "month") return "本月";
+  if (selectedRange.value === "year") return "今年";
+  return "";
 });
 // 輔助：取得 yyyy/M/d
 function getDateStr(dateStr) {

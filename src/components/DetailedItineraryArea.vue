@@ -168,7 +168,7 @@ function goToLogin() {
 }
 
 .mode-container {
-  height: calc(100vh - 250px);
+  height: calc(100vh - 190px);
   overflow: hidden;
 }
 
@@ -229,8 +229,8 @@ function goToLogin() {
 /* 新增活動按鈕 */
 .add-activity-btn {
   position: absolute;
-  bottom: 1em;
-  right: 1em;
+  bottom: 6em;
+  right: 2em;
   width: 50px;
   height: 50px;
   border-radius: 50%;
