@@ -327,7 +327,7 @@
   {
     "date": "2025/6/23",
     "scheduleName": "打掃",
-    "completed": true
+    "completed": false
   },
   {
     "date": "2025/6/23",
@@ -732,7 +732,7 @@
   {
     "date": "2025/7/17",
     "scheduleName": "剪頭髮",
-    "completed": true
+    "completed": false
   },
   {
     "date": "2025/7/18",

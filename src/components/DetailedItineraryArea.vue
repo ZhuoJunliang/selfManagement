@@ -60,7 +60,7 @@
 </template>
 
 <script setup>
-import {inject, computed, onMounted, watch, ref} from "vue";
+import {inject, computed, onMounted, watch, ref, onUnmounted} from "vue";
 import {isLoading, error, loadData, reloadData, itineraryData} from "../services/dataService.js";
 import DayMode from "./DayMode.vue";
 import WeekMode from "./WeekMode.vue";
@@ -106,6 +106,10 @@ watch(selectedDate, () => {
 
 onMounted(() => {
   loadData();
+  window.addEventListener("action-finished", reloadData);
+});
+onUnmounted(() => {
+  window.removeEventListener("action-finished", reloadData);
 });
 
 function showAddActivityPopup() {

@@ -2,6 +2,7 @@ import express from "express";
 import fs from "fs/promises";
 import path from "path";
 import {fileURLToPath} from "url";
+import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 // 其他中間件
 app.use(express.json());
 app.use(express.static("public"));
+app.use(cors());
 
 // 處理 data.txt 的寫入
 app.post("/data.txt", async (req, res) => {
@@ -143,7 +145,136 @@ app.post("/updateUserInfo", async (req, res) => {
   }
 });
 
+// 新增 API 儲存 action
+app.post("/api/saveAction", async (req, res) => {
+  try {
+    console.log("收到 /api/saveAction", req.body);
+    const {actions, startTime, endTime} = req.body;
+    const dataPath = path.join(__dirname, "public", "data.txt");
+    let arr = [];
+    try {
+      const content = await fs.readFile(dataPath, "utf8");
+      arr = JSON.parse(content);
+    } catch (e) {
+      arr = [];
+    }
+    arr.push({actions, startTime, endTime});
+    await fs.writeFile(dataPath, JSON.stringify(arr, null, 2), "utf8");
+    console.log("寫入成功");
+    res.json({success: true});
+  } catch (err) {
+    console.log("寫入失敗", err);
+    res.status(500).json({error: "寫入檔案失敗"});
+  }
+});
+
+// 更新 data.txt 的 API（支援按時間順序插入）
+app.post("/api/updateData", async (req, res) => {
+  try {
+    console.log("收到 /api/updateData", req.body);
+    const newData = req.body;
+    const dataPath = path.join(__dirname, "public", "data.txt");
+
+    // 直接寫入新的資料陣列
+    await fs.writeFile(dataPath, JSON.stringify(newData, null, 2), "utf8");
+    console.log("更新成功");
+    res.json({success: true});
+  } catch (err) {
+    console.log("更新失敗", err);
+    res.status(500).json({error: "更新檔案失敗"});
+  }
+});
+
+// ===== actions.txt 新增活動 API =====
+const actionsFilePath = path.join(__dirname, "public", "actions.txt");
+
+// 新增活動到 actions.txt
+app.post("/api/add-action", async (req, res) => {
+  try {
+    console.log("收到新增活動請求:", req.body);
+
+    const {actionName, actionIcon, actionColor} = req.body;
+
+    // 驗證必要欄位
+    if (!actionName || actionIcon === undefined || !actionColor) {
+      return res.status(400).json({
+        success: false,
+        message: "缺少必要欄位：actionName, actionIcon, actionColor",
+      });
+    }
+
+    // 讀取現有的活動資料
+    let actions = [];
+    try {
+      const data = await fs.readFile(actionsFilePath, "utf8");
+      actions = JSON.parse(data);
+    } catch (error) {
+      // 如果檔案不存在或格式錯誤，使用空陣列
+      console.log("actions.txt 檔案不存在或格式錯誤，將建立新檔案");
+      actions = [];
+    }
+
+    // 建立新的活動物件
+    const newAction = {
+      actionName: actionName.trim(),
+      actionIcon: parseInt(actionIcon),
+      actionColor: actionColor,
+      validEvent: "true",
+    };
+
+    // 檢查是否已存在相同名稱的活動
+    const existingActionIndex = actions.findIndex(action => action.actionName === newAction.actionName);
+
+    if (existingActionIndex !== -1) {
+      return res.status(409).json({
+        success: false,
+        message: "已存在相同名稱的活動",
+      });
+    }
+
+    // 新增活動到陣列
+    actions.push(newAction);
+
+    // 寫入檔案
+    await fs.writeFile(actionsFilePath, JSON.stringify(actions, null, 2), "utf8");
+
+    console.log("活動新增成功:", newAction);
+    res.json({
+      success: true,
+      message: "活動新增成功",
+      data: newAction,
+    });
+  } catch (error) {
+    console.error("新增活動失敗:", error);
+    res.status(500).json({
+      success: false,
+      message: "新增活動失敗",
+      error: error.message,
+    });
+  }
+});
+
+// 取得所有活動
+app.get("/api/actions", async (req, res) => {
+  try {
+    const data = await fs.readFile(actionsFilePath, "utf8");
+    const actions = JSON.parse(data);
+    res.json(actions);
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      // 檔案不存在，回傳空陣列
+      res.json([]);
+    } else {
+      console.error("讀取活動失敗:", error);
+      res.status(500).json({
+        success: false,
+        message: "讀取活動失敗",
+      });
+    }
+  }
+});
+
 // 啟動伺服器
-app.listen(PORT, () => {
-  console.log(`伺服器運行在 http://localhost:${PORT}`);
+app.listen(3001, () => {
+  console.log("Server is running on port 3001");
 });
