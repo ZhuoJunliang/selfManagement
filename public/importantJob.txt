@@ -1,0 +1,10 @@
+[
+  {
+    "actions": 0,
+    "targetTime": 120
+  },
+  {
+    "actions": 12,
+    "targetTime": 60
+  }
+]

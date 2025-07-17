@@ -188,6 +188,19 @@ app.post("/api/updateData", async (req, res) => {
 // ===== actions.txt 新增活動 API =====
 const actionsFilePath = path.join(__dirname, "public", "actions.txt");
 
+// 新增：importantJob.txt 儲存 API
+const importantJobFilePath = path.join(__dirname, "public", "importantJob.txt");
+app.post("/importantJob.txt", async (req, res) => {
+  try {
+    const jobs = req.body;
+    await fs.writeFile(importantJobFilePath, JSON.stringify(jobs, null, 2), "utf8");
+    res.json({success: true, message: "重要工作已儲存"});
+  } catch (err) {
+    console.error("寫入 importantJob.txt 失敗:", err);
+    res.status(500).json({success: false, message: "寫入 importantJob.txt 失敗"});
+  }
+});
+
 // 新增活動到 actions.txt
 app.post("/api/add-action", async (req, res) => {
   try {
