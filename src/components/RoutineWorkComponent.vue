@@ -21,22 +21,8 @@
     <!-- 新增與修改按鈕並排 -->
     <div class="button-row">
       <FloatingAddButton />
-      <div class="edit-button-container">
-        <button class="edit-button" @click="showPopup = true">
-          <span class="edit-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="1.2em"
-              viewBox="0 -960 960 960"
-              width="1.2em"
-              fill="#FFFFFF">
-              <path
-                d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
-            </svg>
-          </span>
-          <span class="button-text">修改</span>
-        </button>
-      </div>
+      <EditButton @click="showPopup = true" />
+      <DeleteButton @click="showDeletePopup = true" />
     </div>
 
     <!-- 修改彈窗 -->
@@ -60,6 +46,38 @@
           <button class="btn-cancel" @click="showPopup = false">關閉</button>
         </div>
       </div>
+    </div>
+
+    <!-- 刪除活動彈窗 -->
+    <div v-if="showDeletePopup" class="popup-overlay" @click.self="showDeletePopup = false">
+      <div class="edit-popup-content">
+        <h3 class="popup-title">刪除活動</h3>
+
+        <!-- 活動卡片網格 -->
+        <div class="edit-action-grid">
+          <div
+            v-for="(action, idx) in actions"
+            :key="action.actionName"
+            class="edit-action-card"
+            @click="selectForDelete(action, idx)">
+            <div class="action-icon" v-html="getIconSvg(action.actionIcon, action.actionColor)"></div>
+            <div class="action-name">{{ action.actionName }}</div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-cancel" @click="showDeletePopup = false">關閉</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 刪除確認區域 -->
+    <div v-if="deletingAction.actionName" class="delete-confirmation-area">
+      <div class="delete-preview">
+        <span class="delete-icon" v-html="getIconSvg(deletingAction.actionIcon, deletingAction.actionColor)"></span>
+        <span class="delete-action-name">{{ deletingAction.actionName }}</span>
+      </div>
+      <button class="btn-delete" @click="confirmDelete">確認刪除</button>
     </div>
 
     <!-- 編輯活動彈窗 -->
@@ -120,6 +138,8 @@
 <script setup>
 import {ref, onMounted, onUnmounted, inject} from "vue";
 import FloatingAddButton from "./FloatingAddButton.vue";
+import EditButton from "./EditButton.vue";
+import DeleteButton from "./DeleteButton.vue";
 
 const actions = ref([]);
 const icons = ref([]);
@@ -129,6 +149,11 @@ const showPopup = ref(false);
 const showEditPopup = ref(false);
 const editingAction = ref({});
 const editingIndex = ref(-1);
+
+// 刪除相關狀態
+const showDeletePopup = ref(false);
+const deletingAction = ref({});
+const deletingIndex = ref(-1);
 
 // 32種常見顏色
 const colors = ref([
@@ -343,6 +368,43 @@ async function saveEdit() {
     alert("修改失敗，請稍後再試");
   }
 }
+
+// 刪除相關函數
+function selectForDelete(action, idx) {
+  deletingAction.value = {...action};
+  deletingIndex.value = idx;
+  showDeletePopup.value = false;
+}
+
+async function confirmDelete() {
+  try {
+    const response = await fetch("http://localhost:3001/api/delete-action", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        index: deletingIndex.value,
+      }),
+    });
+
+    if (response.ok) {
+      // 重置刪除狀態
+      deletingAction.value = {};
+      deletingIndex.value = -1;
+      // 重新載入活動列表
+      await loadActions();
+      // 通知父元件
+      window.dispatchEvent(new CustomEvent("action-updated"));
+    } else {
+      const errorData = await response.json();
+      alert(`刪除失敗：${errorData.message || "請稍後再試"}`);
+    }
+  } catch (error) {
+    console.error("刪除活動時發生錯誤:", error);
+    alert("刪除失敗，請稍後再試");
+  }
+}
 onUnmounted(() => {
   if (timerInterval.value) clearInterval(timerInterval.value);
   // 移除事件監聽器
@@ -424,42 +486,6 @@ onUnmounted(() => {
 .action-grid-card.selected {
   border: 2px solid #1976d2;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12);
-}
-
-/* 編輯按鈕樣式 */
-.edit-button-container {
-  margin-top: 0;
-}
-
-.edit-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 8px;
-  background: #ff9800;
-  color: #fff;
-  border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 1em;
-  font-weight: 500;
-}
-
-.edit-button:hover {
-  background: #f57c00;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.edit-icon {
-  font-size: 1.2em;
-  line-height: 1;
-}
-
-.button-text {
-  font-size: 0.95em;
 }
 
 /* 彈窗樣式 */
@@ -690,9 +716,10 @@ onUnmounted(() => {
   margin-top: 0;
 }
 
-/* 確保兩個按鈕高度一致 */
+/* 確保三個按鈕高度一致 */
 .button-row .add-button,
-.button-row .edit-button {
+.button-row .edit-button,
+.button-row .delete-button {
   height: 44px !important;
   min-height: 44px !important;
   max-height: 44px !important;
@@ -705,7 +732,8 @@ onUnmounted(() => {
 
 /* 統一按鈕內圖標和文字樣式 */
 .button-row .add-button .plus,
-.button-row .edit-button .edit-icon {
+.button-row .edit-button .edit-icon,
+.button-row .delete-button .delete-icon {
   font-size: 1.2em !important;
   line-height: 1 !important;
   display: flex !important;
@@ -713,8 +741,74 @@ onUnmounted(() => {
 }
 
 .button-row .add-button .button-text,
-.button-row .edit-button .button-text {
+.button-row .edit-button .button-text,
+.button-row .delete-button .button-text {
   font-size: 0.95em !important;
   line-height: 1 !important;
+}
+
+/* 刪除確認區域樣式 */
+.delete-confirmation-area {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 2px solid #e74c3c;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 1001;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.delete-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.delete-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-action-name {
+  font-weight: 500;
+  color: #333;
+  font-size: 1.1em;
+}
+
+.btn-delete {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-delete:hover {
+  background: #c0392b;
 }
 </style>

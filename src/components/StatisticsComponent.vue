@@ -2,77 +2,11 @@
   <div class="statistics-component">
     <div class="component-header">
       <h2>統計分析</h2>
-      <p>查看您的活動統計和趨勢</p>
     </div>
 
     <div class="component-content">
-      <div class="stats-overview">
-        <div class="stat-card">
-          <div class="stat-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="1.5em"
-              viewBox="0 -960 960 960"
-              width="1.5em"
-              fill="#007bff">
-              <path
-                d="M280-280h80v-200h-80v200Zm320 0h80v-400h-80v400Zm-160 0h80v-120h-80v120Zm0-200h80v-80h-80v80ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z" />
-            </svg>
-          </div>
-          <div class="stat-info">
-            <div class="stat-number">156</div>
-            <div class="stat-label">本月活動</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="1.5em"
-              viewBox="0 -960 960 960"
-              width="1.5em"
-              fill="#28a745">
-              <path
-                d="M480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-800q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Zm0-360Zm112 168 56-56-128-128v-184h-80v216l152 152ZM224-866l56 56-170 170-56-56 170-170Zm512 0 170 170-56 56-170-170 56-56ZM480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720q-117 0-198.5 81.5T200-440q0 117 81.5 198.5T480-160Z" />
-            </svg>
-          </div>
-          <div class="stat-info">
-            <div class="stat-number">92%</div>
-            <div class="stat-label">完成率</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="chart-section">
-        <h3>本週活動趨勢</h3>
-        <div class="chart-container">
-          <div class="chart-bars">
-            <div class="chart-bar" style="height: 60%">
-              <div class="bar-label">一</div>
-            </div>
-            <div class="chart-bar" style="height: 80%">
-              <div class="bar-label">二</div>
-            </div>
-            <div class="chart-bar" style="height: 45%">
-              <div class="bar-label">三</div>
-            </div>
-            <div class="chart-bar" style="height: 90%">
-              <div class="bar-label">四</div>
-            </div>
-            <div class="chart-bar" style="height: 75%">
-              <div class="bar-label">五</div>
-            </div>
-            <div class="chart-bar" style="height: 50%">
-              <div class="bar-label">六</div>
-            </div>
-            <div class="chart-bar" style="height: 30%">
-              <div class="bar-label">日</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <!-- 刪除 stats-overview 區塊 -->
+      <!-- 刪除 chart-section 區塊 -->
       <div class="activity-breakdown">
         <h3>活動分類</h3>
         <div class="breakdown-items">

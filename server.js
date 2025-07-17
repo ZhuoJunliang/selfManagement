@@ -351,7 +351,7 @@ app.post("/api/update-action", async (req, res) => {
   }
 });
 
-// 刪除活動
+// 刪除活動（將 validEvent 設為 false）
 app.post("/api/delete-action", async (req, res) => {
   try {
     console.log("收到刪除活動請求:", req.body);
@@ -385,17 +385,17 @@ app.post("/api/delete-action", async (req, res) => {
       });
     }
 
-    // 刪除活動
-    const deletedAction = actions.splice(index, 1)[0];
+    // 將活動的 validEvent 設為 false（軟刪除）
+    actions[index].validEvent = "false";
 
     // 寫入檔案
     await fs.writeFile(actionsFilePath, JSON.stringify(actions, null, 2), "utf8");
 
-    console.log("活動刪除成功:", deletedAction);
+    console.log("活動刪除成功:", actions[index]);
     res.json({
       success: true,
       message: "活動刪除成功",
-      data: deletedAction,
+      data: actions[index],
     });
   } catch (error) {
     console.error("刪除活動失敗:", error);
