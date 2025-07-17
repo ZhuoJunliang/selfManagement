@@ -73,6 +73,8 @@ async function loadData() {
           color: action.actionColor,
           startTime: item.startTime,
           endTime: item.endTime,
+          actionIndex: item.actions, // actions.txt 的 index
+          actionIcon: action.actionIcon, // icons.txt 的 index
         };
       })
       .filter(item => item !== null); // 過濾掉 null 項目

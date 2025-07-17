@@ -12,15 +12,24 @@ const __dirname = path.dirname(__filename);
 function generateRandomData() {
   const data = [];
 
-  // 定義月份範圍：6、7、8月
-  const months = [6, 7, 8];
+  // 定義月份範圍：1～12月
+  const months = Array.from({length: 12}, (_, i) => i + 1); // 1~12
   const year = 2025;
 
   // 每個月的天數
   const daysInMonth = {
+    1: 31,
+    2: 28, // 不考慮閏年
+    3: 31,
+    4: 30,
+    5: 31,
     6: 30,
     7: 31,
     8: 31,
+    9: 30,
+    10: 31,
+    11: 30,
+    12: 31,
   };
 
   // 為每一天生成隨機事件
@@ -98,7 +107,7 @@ function writeDataToFile() {
 
     console.log("✅ 數據已成功生成並寫入 data.txt");
     console.log(`📊 總共生成了 ${data.length} 個事件`);
-    console.log(`📅 涵蓋時間範圍：2025年6月1日 - 2025年8月31日`);
+    console.log(`📅 涵蓋時間範圍：2025年1月1日 - 2025年12月31日`);
 
     // 顯示統計資訊
     const totalActions = data.reduce((sum, item) => sum + item.actions, 0);
