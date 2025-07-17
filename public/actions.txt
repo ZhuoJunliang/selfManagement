@@ -104,7 +104,7 @@
   {
     "actionName": "網球運動",
     "actionIcon": 17,
-    "actionColor": "salmon",
+    "actionColor": "olive",
     "validEvent": "true"
   },
   {

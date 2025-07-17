@@ -274,6 +274,139 @@ app.get("/api/actions", async (req, res) => {
   }
 });
 
+// 修改活動
+app.post("/api/update-action", async (req, res) => {
+  try {
+    console.log("收到修改活動請求:", req.body);
+    const {index, action} = req.body;
+
+    // 驗證必要欄位
+    if (
+      index === undefined ||
+      !action ||
+      !action.actionName ||
+      action.actionIcon === undefined ||
+      !action.actionColor
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "缺少必要欄位",
+      });
+    }
+
+    // 讀取現有的活動資料
+    let actions = [];
+    try {
+      const data = await fs.readFile(actionsFilePath, "utf8");
+      actions = JSON.parse(data);
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "讀取活動資料失敗",
+      });
+    }
+
+    // 檢查索引是否有效
+    if (index < 0 || index >= actions.length) {
+      return res.status(404).json({
+        success: false,
+        message: "找不到指定的活動",
+      });
+    }
+
+    // 檢查是否與其他活動名稱重複（排除自己）
+    const existingActionIndex = actions.findIndex((a, i) => i !== index && a.actionName === action.actionName);
+
+    if (existingActionIndex !== -1) {
+      return res.status(409).json({
+        success: false,
+        message: "已存在相同名稱的活動",
+      });
+    }
+
+    // 更新活動
+    actions[index] = {
+      actionName: action.actionName.trim(),
+      actionIcon: parseInt(action.actionIcon),
+      actionColor: action.actionColor,
+      validEvent: "true",
+    };
+
+    // 寫入檔案
+    await fs.writeFile(actionsFilePath, JSON.stringify(actions, null, 2), "utf8");
+
+    console.log("活動修改成功:", actions[index]);
+    res.json({
+      success: true,
+      message: "活動修改成功",
+      data: actions[index],
+    });
+  } catch (error) {
+    console.error("修改活動失敗:", error);
+    res.status(500).json({
+      success: false,
+      message: "修改活動失敗",
+      error: error.message,
+    });
+  }
+});
+
+// 刪除活動
+app.post("/api/delete-action", async (req, res) => {
+  try {
+    console.log("收到刪除活動請求:", req.body);
+    const {index} = req.body;
+
+    // 驗證必要欄位
+    if (index === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "缺少索引欄位",
+      });
+    }
+
+    // 讀取現有的活動資料
+    let actions = [];
+    try {
+      const data = await fs.readFile(actionsFilePath, "utf8");
+      actions = JSON.parse(data);
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "讀取活動資料失敗",
+      });
+    }
+
+    // 檢查索引是否有效
+    if (index < 0 || index >= actions.length) {
+      return res.status(404).json({
+        success: false,
+        message: "找不到指定的活動",
+      });
+    }
+
+    // 刪除活動
+    const deletedAction = actions.splice(index, 1)[0];
+
+    // 寫入檔案
+    await fs.writeFile(actionsFilePath, JSON.stringify(actions, null, 2), "utf8");
+
+    console.log("活動刪除成功:", deletedAction);
+    res.json({
+      success: true,
+      message: "活動刪除成功",
+      data: deletedAction,
+    });
+  } catch (error) {
+    console.error("刪除活動失敗:", error);
+    res.status(500).json({
+      success: false,
+      message: "刪除活動失敗",
+      error: error.message,
+    });
+  }
+});
+
 // 啟動伺服器
 app.listen(3001, () => {
   console.log("Server is running on port 3001");

@@ -1,9 +1,16 @@
 <template>
-  <div class="fab-container">
-    <!-- 浮動加號按鈕 -->
-    <button class="fab" @click="showPopup = true">
-      <span class="plus">+</span>
+  <div class="add-button-container">
+    <!-- 新增活動按鈕 -->
+    <button class="add-button" @click="showPopup = true">
+      <span class="plus">
+        <svg xmlns="http://www.w3.org/2000/svg" height="1.2em" viewBox="0 -960 960 960" width="1.2em" fill="#FFFFFF">
+          <path
+            d="M440-280h80v-120h120v-80H520v-120h-80v120H320v80h120v120Zm40 200q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-800q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Zm0-360ZM224-866l56 56-170 170-56-56 170-170Zm512 0 170 170-56 56-170-170 56-56ZM480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720q-117 0-198.5 81.5T200-440q0 117 81.5 198.5T480-160Z" />
+        </svg>
+      </span>
+      <span class="button-text">新增</span>
     </button>
+
     <!-- 第一個彈窗：選擇 icon -->
     <div v-if="showPopup" class="popup-overlay" @click.self="showPopup = false">
       <div class="add-popup-content">
@@ -186,33 +193,45 @@ const saveActivity = async () => {
 </script>
 
 <style scoped>
-.fab-container {
-  position: absolute;
-  right: 24px;
-  bottom: 24px;
-  z-index: 20;
+.add-button-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
-.fab {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+.add-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 8px;
   background: #42a5f5;
   color: #fff;
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  font-size: 1em;
+  font-weight: 500;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+  box-sizing: border-box;
+  line-height: 1;
 }
-.fab:hover {
+.add-button:hover {
   background: #1976d2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 .plus {
   font-size: 1.2em;
   line-height: 1;
+  font-weight: bold;
+}
+.button-text {
+  font-size: 0.95em;
 }
 .popup-overlay {
   position: fixed;
