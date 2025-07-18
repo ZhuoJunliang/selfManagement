@@ -222,6 +222,48 @@ const timer = ref(0);
 const timerInterval = ref(null);
 const timerDisplay = ref("00:00:00");
 
+// localStorage 相關函數
+function saveCurrentActionToStorage() {
+  if (currentAction.value) {
+    const actionData = {
+      action: currentAction.value,
+      actionIdx: currentActionIdx.value,
+      startTime: startTime.value,
+      startTimestamp: new Date().getTime() - timer.value * 1000, // 計算實際開始時間戳
+    };
+    localStorage.setItem("currentAction", JSON.stringify(actionData));
+  } else {
+    localStorage.removeItem("currentAction");
+  }
+}
+
+function loadCurrentActionFromStorage() {
+  const savedData = localStorage.getItem("currentAction");
+  if (savedData) {
+    try {
+      const actionData = JSON.parse(savedData);
+      const now = new Date().getTime();
+      const elapsedSeconds = Math.floor((now - actionData.startTimestamp) / 1000);
+
+      // 恢復狀態
+      currentAction.value = actionData.action;
+      currentActionIdx.value = actionData.actionIdx;
+      startTime.value = actionData.startTime;
+      timer.value = elapsedSeconds;
+      timerDisplay.value = formatTimer(elapsedSeconds);
+
+      // 重新啟動計時器
+      timerInterval.value = setInterval(() => {
+        timer.value = Math.floor((new Date().getTime() - actionData.startTimestamp) / 1000);
+        timerDisplay.value = formatTimer(timer.value);
+      }, 1000);
+    } catch (error) {
+      console.error("載入儲存的活動狀態失敗:", error);
+      localStorage.removeItem("currentAction");
+    }
+  }
+}
+
 function formatTimer(sec) {
   const h = String(Math.floor(sec / 3600)).padStart(2, "0");
   const m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
@@ -242,6 +284,9 @@ function startAction(action, idx) {
     timer.value = Math.floor((new Date() - now) / 1000);
     timerDisplay.value = formatTimer(timer.value);
   }, 1000);
+
+  // 儲存到 localStorage
+  saveCurrentActionToStorage();
 }
 
 function endAction() {
@@ -255,8 +300,13 @@ function endAction() {
   };
 
   // 先讀取現有資料
-  fetch("/data.txt")
-    .then(res => res.json())
+  fetch("http://localhost:3001/api/data")
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(existingData => {
       // 將新活動插入到正確的時間順序位置
       const newData = [...existingData];
@@ -270,6 +320,12 @@ function endAction() {
         body: JSON.stringify(newData),
       });
     })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(() => {
       // 通知父元件或 emit event
       window.dispatchEvent(new CustomEvent("action-finished"));
@@ -280,9 +336,13 @@ function endAction() {
       startTime.value = null;
       timer.value = 0;
       timerDisplay.value = "00:00:00";
+
+      // 清除 localStorage
+      localStorage.removeItem("currentAction");
     })
     .catch(err => {
-      alert("儲存失敗: " + err);
+      console.error("儲存失敗:", err);
+      alert("儲存失敗: " + err.message);
     });
 }
 
@@ -308,9 +368,31 @@ onMounted(async () => {
   const iconRes = await fetch("/icons.txt");
   icons.value = await iconRes.json();
 
+  // 載入儲存的活動狀態
+  loadCurrentActionFromStorage();
+
   // 監聽活動更新事件
   window.addEventListener("action-updated", loadActions);
+
+  // 監聽頁面可見性變更
+  document.addEventListener("visibilitychange", handleVisibilityChange);
 });
+
+// 處理頁面可見性變更
+function handleVisibilityChange() {
+  if (document.hidden) {
+    // 頁面隱藏時，儲存當前狀態
+    if (currentAction.value) {
+      saveCurrentActionToStorage();
+    }
+  } else {
+    // 頁面重新可見時，重新計算計時器
+    if (currentAction.value && timerInterval.value) {
+      clearInterval(timerInterval.value);
+      loadCurrentActionFromStorage();
+    }
+  }
+}
 
 async function loadActions() {
   try {
@@ -409,6 +491,7 @@ onUnmounted(() => {
   if (timerInterval.value) clearInterval(timerInterval.value);
   // 移除事件監聽器
   window.removeEventListener("action-updated", loadActions);
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
 });
 </script>
 

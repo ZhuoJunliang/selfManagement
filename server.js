@@ -26,7 +26,8 @@ app.use((req, res, next) => {
 });
 
 // 其他中間件
-app.use(express.json());
+app.use(express.json({limit: "50mb"}));
+app.use(express.urlencoded({limit: "50mb", extended: true}));
 app.use(express.static("public"));
 app.use(cors());
 
@@ -46,6 +47,20 @@ app.post("/data.txt", async (req, res) => {
   } catch (error) {
     console.error("儲存資料失敗:", error);
     res.status(500).json({success: false, message: "儲存資料失敗"});
+  }
+});
+
+// 讀取 data.txt 的 API
+app.get("/api/data", async (req, res) => {
+  try {
+    const filePath = path.join(__dirname, "public", "data.txt");
+    const data = await fs.readFile(filePath, "utf8");
+    const jsonData = JSON.parse(data);
+    res.json(jsonData);
+  } catch (error) {
+    console.error("讀取 data.txt 失敗:", error);
+    // 如果檔案不存在或讀取失敗，返回空陣列
+    res.json([]);
   }
 });
 
