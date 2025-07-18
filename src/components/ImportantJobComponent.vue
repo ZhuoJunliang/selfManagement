@@ -19,11 +19,11 @@
         <li v-for="(job, idx) in importantJobs" :key="idx">
           <span>
             {{ validActions.find(a => a.idx === job.actions)?.actionName || "未知工作" }}
-            （{{ Math.floor(job.targetTime / 60) }}小時{{ job.targetTime % 60 }}分鐘）
+            （{{ formatTime(job.targetTime) }}）
           </span>
           <div v-if="jobProgress[idx]">
             <span style="color: #007bff; font-size: 0.95em">
-              完成：{{ jobProgress[idx].done }} 分鐘 / {{ jobProgress[idx].target * rangeDays }} 分鐘 （{{
+              完成：{{ formatTime(jobProgress[idx].done) }} / {{ formatTime(jobProgress[idx].target * rangeDays) }} （{{
                 jobProgress[idx].target > 0
                   ? Math.round((jobProgress[idx].done / (jobProgress[idx].target * rangeDays)) * 100)
                   : 0
@@ -106,6 +106,21 @@ function getDateStr(dateStr) {
 function formatDateToYMD(date) {
   if (!(date instanceof Date)) return "";
   return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+}
+
+// 格式化時間顯示：超過60分鐘顯示為小時和分鐘
+function formatTime(minutes) {
+  if (minutes < 60) {
+    return `${minutes}分鐘`;
+  } else {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (remainingMinutes === 0) {
+      return `${hours}小時`;
+    } else {
+      return `${hours}小時${remainingMinutes}分鐘`;
+    }
+  }
 }
 
 // 統計當天每個重要工作的完成分鐘數

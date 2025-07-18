@@ -4,6 +4,10 @@
     "targetTime": 120
   },
   {
+    "actions": 1,
+    "targetTime": 65
+  },
+  {
     "actions": 12,
     "targetTime": 60
   }
