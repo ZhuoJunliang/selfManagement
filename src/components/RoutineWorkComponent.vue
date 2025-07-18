@@ -26,7 +26,7 @@
     </div>
 
     <!-- 修改彈窗 -->
-    <div v-if="showPopup" class="popup-overlay" @click.self="showPopup = false">
+    <div v-if="showPopup" class="popup-overlay" @click.self="handlePopupOutsideClick">
       <div class="edit-popup-content">
         <h3 class="popup-title">修改活動</h3>
 
@@ -36,9 +36,21 @@
             v-for="(action, idx) in actions"
             :key="action.actionName"
             class="edit-action-card"
-            @click="editAction(action, idx)">
+            @click="selectForDelete(action, idx)">
             <div class="action-icon" v-html="getIconSvg(action.actionIcon, action.actionColor)"></div>
             <div class="action-name">{{ action.actionName }}</div>
+          </div>
+        </div>
+
+        <!-- 刪除確認區域 -->
+        <div v-if="deletingAction.actionName" class="delete-confirmation-area-popup">
+          <div class="delete-preview">
+            <span class="delete-icon" v-html="getIconSvg(deletingAction.actionIcon, deletingAction.actionColor)"></span>
+            <span class="delete-action-name">{{ deletingAction.actionName }}</span>
+          </div>
+          <div class="delete-actions">
+            <button class="btn-cancel-delete" @click="cancelDelete">取消</button>
+            <button class="btn-delete" @click="confirmDelete">確認刪除</button>
           </div>
         </div>
 
@@ -49,7 +61,7 @@
     </div>
 
     <!-- 刪除活動彈窗 -->
-    <div v-if="showDeletePopup" class="popup-overlay" @click.self="showDeletePopup = false">
+    <div v-if="showDeletePopup" class="popup-overlay" @click.self="handleDeletePopupOutsideClick">
       <div class="edit-popup-content">
         <h3 class="popup-title">刪除活動</h3>
 
@@ -65,19 +77,22 @@
           </div>
         </div>
 
+        <!-- 刪除確認區域 -->
+        <div v-if="deletingAction.actionName" class="delete-confirmation-area-popup">
+          <div class="delete-preview">
+            <span class="delete-icon" v-html="getIconSvg(deletingAction.actionIcon, deletingAction.actionColor)"></span>
+            <span class="delete-action-name">{{ deletingAction.actionName }}</span>
+          </div>
+          <div class="delete-actions">
+            <button class="btn-cancel-delete" @click="cancelDelete">取消</button>
+            <button class="btn-delete" @click="confirmDelete">確認刪除</button>
+          </div>
+        </div>
+
         <div class="form-actions">
           <button class="btn-cancel" @click="showDeletePopup = false">關閉</button>
         </div>
       </div>
-    </div>
-
-    <!-- 刪除確認區域 -->
-    <div v-if="deletingAction.actionName" class="delete-confirmation-area">
-      <div class="delete-preview">
-        <span class="delete-icon" v-html="getIconSvg(deletingAction.actionIcon, deletingAction.actionColor)"></span>
-        <span class="delete-action-name">{{ deletingAction.actionName }}</span>
-      </div>
-      <button class="btn-delete" @click="confirmDelete">確認刪除</button>
     </div>
 
     <!-- 編輯活動彈窗 -->
@@ -455,7 +470,32 @@ async function saveEdit() {
 function selectForDelete(action, idx) {
   deletingAction.value = {...action};
   deletingIndex.value = idx;
+  // 如果是在修改彈窗中點擊，則關閉修改彈窗
+  if (showPopup.value) {
+    showPopup.value = false;
+  }
+  // 如果是在刪除彈窗中點擊，保持彈窗開啟
+}
+
+function cancelDelete() {
+  deletingAction.value = {};
+  deletingIndex.value = -1;
+}
+
+function handlePopupOutsideClick() {
+  showPopup.value = false;
+  // 如果有選中的刪除項目，也要取消
+  if (deletingAction.value.actionName) {
+    cancelDelete();
+  }
+}
+
+function handleDeletePopupOutsideClick() {
   showDeletePopup.value = false;
+  // 如果有選中的刪除項目，也要取消
+  if (deletingAction.value.actionName) {
+    cancelDelete();
+  }
 }
 
 async function confirmDelete() {
@@ -478,6 +518,9 @@ async function confirmDelete() {
       await loadActions();
       // 通知父元件
       window.dispatchEvent(new CustomEvent("action-updated"));
+      // 關閉所有彈窗
+      showPopup.value = false;
+      showDeletePopup.value = false;
     } else {
       const errorData = await response.json();
       alert(`刪除失敗：${errorData.message || "請稍後再試"}`);
@@ -831,31 +874,30 @@ onUnmounted(() => {
 }
 
 /* 刪除確認區域樣式 */
-.delete-confirmation-area {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+.delete-confirmation-area-popup {
   background: #fff;
   border: 2px solid #e74c3c;
   border-radius: 12px;
   padding: 16px 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  z-index: 1001;
-  animation: slideUp 0.3s ease-out;
+  margin: 16px 0;
+  animation: fadeIn 0.3s ease-out;
 }
 
-@keyframes slideUp {
+.delete-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+@keyframes fadeIn {
   from {
-    transform: translateX(-50%) translateY(100%);
     opacity: 0;
+    transform: translateY(-10px);
   }
   to {
-    transform: translateX(-50%) translateY(0);
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -893,5 +935,21 @@ onUnmounted(() => {
 
 .btn-delete:hover {
   background: #c0392b;
+}
+
+.btn-cancel-delete {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel-delete:hover {
+  background: #7f8c8d;
 }
 </style>

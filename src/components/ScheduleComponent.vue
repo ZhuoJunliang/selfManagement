@@ -82,7 +82,13 @@
             <div v-if="confirmDeleteIdx !== editIdx" class="action-btn delete-btn" @click="askDelete(editIdx)">
               刪除
             </div>
-            <div v-else class="action-btn delete-btn confirm" @click="doDelete(editIdx)">確認刪除？</div>
+            <div
+              v-else
+              class="action-btn delete-btn confirm"
+              :class="{disabled: !canDelete}"
+              @click="canDelete && doDelete(editIdx)">
+              {{ canDelete ? "確認刪除？" : "請稍候(1s)" }}
+            </div>
           </div>
         </div>
       </div>
@@ -100,6 +106,8 @@ const editIdx = ref(null); // null: 新增, 數字: 編輯
 const form = reactive({date: "", scheduleName: "", dateInput: "", completed: false});
 const errorMsg = ref("");
 const confirmDeleteIdx = ref(null); // 用於記錄要確認刪除的 index
+const deleteTimer = ref(null); // 用於記錄刪除確認的計時器
+const canDelete = ref(false); // 用於控制是否可以點選確認刪除
 
 // 取得全域 selectedDate
 const selectedDate = inject("selectedDate");
@@ -176,10 +184,20 @@ function closeForm() {
 function handleCancel() {
   showForm.value = false;
   confirmDeleteIdx.value = null;
+  canDelete.value = false;
+  if (deleteTimer.value) {
+    clearTimeout(deleteTimer.value);
+    deleteTimer.value = null;
+  }
 }
 function handleModalBgClick() {
   showForm.value = false;
   confirmDeleteIdx.value = null;
+  canDelete.value = false;
+  if (deleteTimer.value) {
+    clearTimeout(deleteTimer.value);
+    deleteTimer.value = null;
+  }
 }
 
 // 監聽 form.date，初始化/切換時自動轉 yyyy/m/d -> yyyy-mm-dd
@@ -246,6 +264,17 @@ async function deleteSchedule(idx) {
 
 function askDelete(idx) {
   confirmDeleteIdx.value = idx;
+  canDelete.value = false;
+
+  // 清除之前的計時器
+  if (deleteTimer.value) {
+    clearTimeout(deleteTimer.value);
+  }
+
+  // 設定1秒後才能點選確認刪除
+  deleteTimer.value = setTimeout(() => {
+    canDelete.value = true;
+  }, 1000);
 }
 
 async function doDelete(idx) {
@@ -255,6 +284,11 @@ async function doDelete(idx) {
     await fetchSchedules();
     showForm.value = false;
     confirmDeleteIdx.value = null;
+    canDelete.value = false;
+    if (deleteTimer.value) {
+      clearTimeout(deleteTimer.value);
+      deleteTimer.value = null;
+    }
   } catch (e) {
     errorMsg.value = e.message || "刪除失敗";
   }
@@ -378,6 +412,13 @@ async function doDelete(idx) {
   color: #fff;
   font-weight: bold;
   animation: confirmPulse 0.3s ease;
+}
+.delete-btn.confirm.disabled {
+  background: #ccc;
+  border-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  animation: none;
 }
 @keyframes confirmPulse {
   0% {

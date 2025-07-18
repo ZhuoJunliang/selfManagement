@@ -57,7 +57,9 @@
             <button v-if="!confirmDelete" class="btn-delete" @click="askDelete" :disabled="isDeleting">
               {{ isDeleting ? "刪除中..." : "刪除" }}
             </button>
-            <button v-else class="btn-delete confirm" @click="deleteActivity">確認刪除？</button>
+            <button v-else class="btn-delete confirm" @click="deleteActivity" :disabled="deleteDelayCountdown > 0">
+              {{ deleteDelayCountdown > 0 ? `請稍後(${deleteDelayCountdown}s)` : "確認刪除？" }}
+            </button>
             <button class="btn-cancel" @click="closePopup">取消</button>
             <button
               class="btn-save"
@@ -144,6 +146,8 @@ const isSaving = ref(false);
 const isDeleting = ref(false);
 const saveError = ref("");
 const confirmDelete = ref(false); // 用於控制刪除確認狀態
+const deleteDelayTimer = ref(null); // 刪除延遲計時器
+const deleteDelayCountdown = ref(0); // 刪除延遲倒數計時
 
 // 時間驗證
 const isEndTimeValid = computed(() => {
@@ -215,6 +219,13 @@ function closePopup() {
   emit("close");
   saveError.value = "";
   confirmDelete.value = false;
+
+  // 清除刪除延遲計時器
+  if (deleteDelayTimer.value) {
+    clearInterval(deleteDelayTimer.value);
+    deleteDelayTimer.value = null;
+  }
+  deleteDelayCountdown.value = 0;
 }
 
 function selectActivity(activity) {
@@ -262,6 +273,21 @@ async function saveActivity() {
 
 function askDelete() {
   confirmDelete.value = true;
+  deleteDelayCountdown.value = 1; // 設定1秒延遲
+
+  // 清除之前的計時器
+  if (deleteDelayTimer.value) {
+    clearInterval(deleteDelayTimer.value);
+  }
+
+  // 開始倒數計時
+  deleteDelayTimer.value = setInterval(() => {
+    deleteDelayCountdown.value--;
+    if (deleteDelayCountdown.value <= 0) {
+      clearInterval(deleteDelayTimer.value);
+      deleteDelayTimer.value = null;
+    }
+  }, 1000);
 }
 
 async function deleteActivity() {
@@ -430,6 +456,13 @@ watch(
       };
       saveError.value = "";
       confirmDelete.value = false;
+
+      // 清除刪除延遲計時器
+      if (deleteDelayTimer.value) {
+        clearInterval(deleteDelayTimer.value);
+        deleteDelayTimer.value = null;
+      }
+      deleteDelayCountdown.value = 0;
     }
   }
 );
@@ -702,6 +735,14 @@ watch(
   color: #fff;
   font-weight: bold;
   animation: confirmPulse 0.3s ease;
+}
+
+.btn-delete.confirm:disabled {
+  background: #bdc3c7;
+  border-color: #bdc3c7;
+  color: #7f8c8d;
+  cursor: not-allowed;
+  animation: none;
 }
 
 @keyframes confirmPulse {
